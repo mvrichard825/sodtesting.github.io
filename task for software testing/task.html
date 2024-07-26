@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Form with React - Dark Mode/Day Mode</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: background-color 0.5s ease;
+    }
+
+    @keyframes blink {
+      0% { background-color: #333; }
+      50% { background-color: #444; }
+      100% { background-color: #333; }
+    }
+
+    .dark-mode {
+      animation: blink 1s infinite;
+      color: #fff;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: #007bff;
+    }
+
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .form-group button:hover {
+      background-color: #218838;
+    }
+
+    .form-group button:disabled {
+      background-color: #ccc;
+    }
+
+    .error {
+      color: red;
+      margin-bottom: 10px;
+    }
+
+    .background-picker {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .background-picker button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+
+    .background-picker button:hover {
+      background-color: #0056b3;
+    }
+
+    .dark-mode .form-container {
+      background: #444;
+    }
+
+    .dark-mode .form-group input {
+      border: 1px solid #555;
+      background: #555;
+      color: #fff;
+    }
+
+    .dark-mode .form-group button {
+      background-color: #007bff;
+    }
+
+    .dark-mode .form-group button:disabled {
+      background-color: #555;
+    }
+
+    .dark-mode .error {
+      color: #ff6b6b;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const App = () => {
+      const [name, setName] = useState('');
+      const [birthdate, setBirthdate] = useState('');
+      const [email, setEmail] = useState('');
+      const [errors, setErrors] = useState({});
+      const [darkMode, setDarkMode] = useState(false);
+
+      useEffect(() => {
+        const savedMode = localStorage.getItem('darkMode') === 'true';
+        setDarkMode(savedMode);
+      }, []);
+
+      const validate = () => {
+        const errors = {};
+
+        if (!name) {
+          errors.name = 'Name is required';
+        } else if (!/^[a-zA-Z ]+$/.test(name)) {
+          errors.name = 'Name must be only letters';
+        }
+
+        if (!birthdate) {
+          errors.birthdate = 'Birthdate is required';
+        } else if (isNaN(Date.parse(birthdate))) {
+          errors.birthdate = 'Invalid birthdate';
+        }
+
+        if (!email) {
+          errors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+          errors.email = 'Email is invalid';
+        }
+
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+      };
+
+      const handleSubmit = (event) => {
+        event.preventDefault();
+        if (validate()) {
+          alert('Form is valid');
+        }
+      };
+
+      const toggleDarkMode = () => {
+        const newMode = !darkMode;
+        setDarkMode(newMode);
+        localStorage.setItem('darkMode', newMode);
+      };
+
+      return (
+        <div className={darkMode ? 'dark-mode' : ''}>
+          <div className="form-container">
+            <div className="background-picker">
+              <button onClick={toggleDarkMode}>
+                {darkMode ? 'Switch to Day Mode' : 'Switch to Dark Mode'}
+              </button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="name">Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <div className="error">{errors.name}</div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="birthdate">Birthdate</label>
+                <input
+                  type="date"
+                  id="birthdate"
+                  placeholder="Enter your birthdate"
+                  value={birthdate}
+                  onChange={(e) => setBirthdate(e.target.value)}
+                />
+                <div className="error">{errors.birthdate}</div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <div className="error">{errors.email}</div>
+              </div>
+              <div className="form-group">
+                <button type="submit">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
